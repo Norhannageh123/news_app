@@ -18,6 +18,13 @@ class _TabBarCategoryState extends State<TabBarCategory> {
 
   @override
   Widget build(BuildContext context) {
+    // التحقق من وجود عناصر في القائمة
+    if (widget.sourceList.isEmpty) {
+      return Center(
+        child: Text('No sources available'), // رسالة إذا كانت القائمة فارغة
+      );
+    }
+
     return Column(
       children: [
         DefaultTabController(
@@ -28,8 +35,9 @@ class _TabBarCategoryState extends State<TabBarCategory> {
             indicatorColor: Theme.of(context).indicatorColor,
             dividerColor: AppColors.transparent,
             onTap: (index) {
-              selectedIndex = index;
-              setState(() {});
+              setState(() {
+                selectedIndex = index;
+              });
             },
             tabs: widget.sourceList.map((source) {
               return SourcenameWidget(
@@ -40,8 +48,10 @@ class _TabBarCategoryState extends State<TabBarCategory> {
           ),
         ),
         Expanded(
-          child: NewsWidget(source: widget.sourceList[selectedIndex]),
-        )
+          child: widget.sourceList.isNotEmpty
+              ? NewsWidget(source: widget.sourceList[selectedIndex])
+              : Center(child: CircularProgressIndicator()),
+        ),
       ],
     );
   }
