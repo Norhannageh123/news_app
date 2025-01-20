@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:news_app/Ui/home/Drawer/category_widget.dart';
 import 'package:news_app/Ui/home/Drawer/drawer_item.dart';
 import 'package:news_app/Ui/home/Drawer/switch_widget.dart';
 import 'package:news_app/provider/languageProvider.dart';
+import 'package:news_app/provider/themeProvider.dart';
 import 'package:news_app/utls/app_colors.dart';
 import 'package:news_app/utls/app_images.dart';
 import 'package:news_app/utls/app_styles.dart';
@@ -20,7 +20,8 @@ class HomeDrawer extends StatefulWidget {
 class _HomeDrawerState extends State<HomeDrawer> {
   @override
   Widget build(BuildContext context) {
-    var languageProvider = Provider.of<LanguageProvider>(context, listen: true);
+    var languageProvider = Provider.of<LanguageProvider>(context);
+    var themeProvider = Provider.of<AppThemeProvider>(context);
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
 
@@ -54,8 +55,18 @@ class _HomeDrawerState extends State<HomeDrawer> {
           imagePath: AppImages.theme,
           text: AppLocalizations.of(context)!.theme,
         ),
-        CategoryWidget(
-          text: AppLocalizations.of(context)!.dark,
+        SwitchWidget(
+          text1: AppLocalizations.of(context)!.dark,
+          text2: AppLocalizations.of(context)!.light,
+          onClicked: () {
+            ThemeMode newTheme = themeProvider.appTheme == ThemeMode.dark
+                ? ThemeMode.light
+                : ThemeMode.dark;
+            themeProvider.changeTheme(newTheme);
+            setState(() {
+              
+            });
+          },
         ),
         Divider(
           color: AppColors.whiteColor,
@@ -74,7 +85,16 @@ class _HomeDrawerState extends State<HomeDrawer> {
             String newLanguage =
                 languageProvider.appLanguage == 'en' ? 'ar' : 'en';
             languageProvider.changeLanguage(newLanguage);
+            setState(() {
+              
+            });
           },
+        ),
+        Divider(
+          color: AppColors.whiteColor,
+          thickness: 2,
+          indent: width * 0.06,
+          endIndent: width * 0.06,
         ),
       ],
     );

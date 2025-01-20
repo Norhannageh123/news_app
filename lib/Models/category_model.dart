@@ -2,70 +2,59 @@ import 'package:flutter/material.dart';
 import 'package:news_app/utls/app_images.dart';
 
 class CategoryModel {
-  String? id;
-  String? title;
-  String? imagePath;
+  String id;
+  String title;
+  String imageLightPath;
+  String imageDarkPath;
   CategoryModel(
-      {required this.id, required this.title, required this.imagePath});
+      {required this.id, required this.title, required this.imageLightPath,required this.imageDarkPath});
   /*
   business entertainment
   general health
   science sports
   technology
   */
-  static List<CategoryModel> getCategoriesList(BuildContext context) {
+  static List<CategoryModel> getCategoriesList(
+      BuildContext context) {
     return [
       CategoryModel(
           id: 'entertainment',
           title: 'Entertainment',
-          imagePath: Theme.of(context).brightness == Brightness.dark
-              ? AppImages.entrainmentDark
-              : AppImages.entrainmentLight),
+          imageLightPath: AppImages.entrainmentLight,
+          imageDarkPath : AppImages.entrainmentDark
+          ),
       CategoryModel(
         id: 'business',
         title: 'Business',
-        imagePath: Theme.of(context).brightness == Brightness.dark
-            ? AppImages.businessDark
-            : AppImages.businessLight,
+        imageLightPath: AppImages.businessLight,
+        imageDarkPath : AppImages.businessDark,
       ),
       CategoryModel(
         id: 'general',
         title: 'General',
-        imagePath: Theme.of(context).brightness == Brightness.dark
-            ? AppImages.generalDark
-            : AppImages.generalLight,
-            
-      ),
-      
-      CategoryModel(
-        id: 'health',
-        title: 'Health',
-        imagePath: Theme.of(context).brightness == Brightness.dark
-            ? AppImages.healthDarj
-            : AppImages.healthLight,
-            
+        imageLightPath: AppImages.generalLight,
+        imageDarkPath : AppImages.generalDark,
       ),
       CategoryModel(
-        id: 'science',
-        title: 'Science',
-        imagePath: Theme.of(context).brightness == Brightness.dark
-            ? AppImages.scienceDark
-            : AppImages.scienceLight,
-      ),
+          id: 'health',
+          title: 'Health',
+          imageLightPath: AppImages.healthLight,
+          imageDarkPath : AppImages.healthDarj),
       CategoryModel(
-        id: 'technology',
-        title: 'Technology',
-        imagePath: Theme.of(context).brightness == Brightness.dark
-            ? AppImages.technologyDark
-            : AppImages.technologyLight,
-      ),
+          id: 'science',
+          title: 'Science',
+          imageLightPath: AppImages.scienceLight,
+          imageDarkPath: AppImages.scienceDark),
       CategoryModel(
-        id: 'sports',
-        title: 'Sports',
-        imagePath: Theme.of(context).brightness == Brightness.dark
-            ? AppImages.sportsDark
-            : AppImages.sportsLight,
-      ),
+          id: 'technology',
+          title: 'Technology',
+          imageLightPath: AppImages.technologyLight,
+          imageDarkPath : AppImages.technologyDark),
+      CategoryModel(
+          id: 'sports',
+          title: 'Sports',
+          imageLightPath: AppImages.sportsLight,
+          imageDarkPath : AppImages.sportsDark),
     ];
   }
 }
