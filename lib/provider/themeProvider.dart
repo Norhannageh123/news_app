@@ -24,4 +24,8 @@ class AppThemeProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('appTheme', newTheme == ThemeMode.dark ? 'dark' : 'light');
   }
+  bool isDark(){
+    return appTheme==ThemeMode.dark;
+   
+  }
 }

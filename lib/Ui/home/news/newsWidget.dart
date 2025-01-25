@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:news_app/ApI/api_manager.dart';
-import 'package:news_app/Models/NewsResponse.dart';
 import 'package:news_app/Models/sourseResponce.dart';
 import 'package:news_app/Ui/home/news/news_item.dart';
 import 'package:news_app/provider/languageProvider.dart';
 import 'package:news_app/utls/app_colors.dart';
-import 'package:news_app/utls/app_images.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
@@ -16,126 +14,118 @@ class NewsWidget extends StatefulWidget {
   @override
   State<NewsWidget> createState() => _NewsWidgetState();
 }
-
 class _NewsWidgetState extends State<NewsWidget> {
-  late Future<NewsResponse?> futureNews;
-  
+  List<dynamic> articles = []; 
+  int currentPage = 1;
+  bool isLoading = false;
+  bool hasMore = true;
+  late ScrollController _scrollController;
+
   @override
   void initState() {
     super.initState();
-    _updateNews();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_scrollListener);
+    _updateNews(); 
   }
 
   @override
   void didUpdateWidget(covariant NewsWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.source.id != widget.source.id) {
+      setState(() {
+        articles.clear();
+        currentPage = 1;
+        hasMore = true;
+        _updateNews();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels ==
+            _scrollController.position.maxScrollExtent &&
+        !isLoading &&
+        hasMore) {
       _updateNews();
     }
   }
 
-  void _updateNews() {
-    final languageProvider = Provider.of<LanguageProvider>(context, listen: false);  
-    String currentLanguage = languageProvider.appLanguage;  
-    if (widget.source.id != null && widget.source.id!.isNotEmpty) {
-      futureNews = ApiManager.getNewsbysourceId(widget.source.id!, currentLanguage);
+  void _updateNews() async {
+    if (isLoading || !hasMore) return;
+
+    setState(() {
+      isLoading = true;
+    });
+
+    final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
+    String currentLanguage = languageProvider.appLanguage;
+
+    try {
+      var response = await ApiManager.getNewsbysourceId(
+        widget.source.id!,
+        currentLanguage,
+        currentPage,
+      );
+
+      if (response != null && response.articles != null) {
+        setState(() {
+          articles.addAll(response.articles!); 
+          currentPage++;
+          hasMore = response.articles!.isNotEmpty; 
+        });
+      }
+    } catch (e) {
+      print("Error: $e");
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final languageProvider = Provider.of<LanguageProvider>(context);  
-    String currentLanguage = languageProvider.appLanguage;  
-    var height = MediaQuery.of(context).size.height;
-    var width = MediaQuery.of(context).size.width;
-    var theme = Theme.of(context);
-    var isDarkTheme = theme.brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDarkTheme = theme.brightness == Brightness.dark;
     final appLocalizations = AppLocalizations.of(context);
 
     return Container(
       color: theme.scaffoldBackgroundColor,
-      child: FutureBuilder<NewsResponse?>(
-        future: futureNews,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
+      child: articles.isEmpty && isLoading
+          ? Center(
               child: CircularProgressIndicator(
                 color: isDarkTheme ? AppColors.whiteColor : AppColors.greyColor,
               ),
-            );
-          } else if (snapshot.hasError || snapshot.data == null) {
-            return _buildErrorWidget(context, height, width, isDarkTheme, appLocalizations);
-          }
-
-          if (snapshot.data!.status != "ok") {
-            return _buildErrorWidget(context, height, width, isDarkTheme,
-                appLocalizations, message: snapshot.data!.message ?? appLocalizations!.try_again);
-          }
-
-          var newsList = snapshot.data!.articles ?? [];
-          return ListView.builder(
-            itemBuilder: (context, index) {
-              return NewsItem(news: newsList[index]);
-            },
-            itemCount: newsList.length,
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildErrorWidget(BuildContext context, double height, double width,
-      bool isDarkTheme, AppLocalizations? appLocalizations, {String message = ""}) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.error_outline_outlined,
-                  color: AppColors.redColor,
-                  size: 40,
-                ),
-                SizedBox(width: width * 0.03),
-                Expanded(
-                  child: Text(
-                    message.isEmpty ? appLocalizations!.something_went_wrong : message,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ),
-              ],
-            ),
-            Image.asset(
-              AppImages.error,
-              height: height * 0.3,
-              width: width * 0.2,
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.redColor,
-                padding: EdgeInsets.symmetric(
-                    horizontal: width * 0.02, vertical: height * 0.02),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                elevation: 5,
-              ),
-              onPressed: () {
-                setState(() {
-                  _updateNews(); 
-                });
+            )
+          : ListView.builder(
+              controller: _scrollController,
+              itemCount: articles.length + 1, 
+              itemBuilder: (context, index) {
+                if (index < articles.length) {
+                  return NewsItem(news: articles[index]); 
+                } else {
+                  return hasMore
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: CircularProgressIndicator(
+                              color: isDarkTheme
+                                  ? AppColors.whiteColor
+                                  : AppColors.greyColor,
+                            ),
+                          ),
+                        )
+                      : SizedBox.shrink();
+                }
               },
-              child: Text(
-                appLocalizations!.try_again,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
             ),
-          ],
-        ),
-      ),
     );
   }
 }

@@ -1,8 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:news_app/Models/NewsResponse.dart';
+import 'package:news_app/Ui/home/news/bottom_sheet_news.dart';
 import 'package:news_app/utls/app_colors.dart';
 import 'package:news_app/utls/app_styles.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class NewsItem extends StatefulWidget {
   NewsItem({super.key, required this.news});
@@ -30,6 +32,18 @@ class _NewsItemState extends State<NewsItem> {
     }
   }
 
+  void _showBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return BottomSheetNews(news: widget.news,);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
@@ -37,68 +51,74 @@ class _NewsItemState extends State<NewsItem> {
 
     final publishedDate = DateTime.tryParse(widget.news.publishedAt ?? "");
 
-    return Container(
-      margin: EdgeInsets.symmetric(
-        vertical: height * 0.02,
-        horizontal: width * 0.02,
-      ),
-      padding: EdgeInsets.symmetric(
-        vertical: height * 0.01,
-        horizontal: width * 0.02,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Theme.of(context).indicatorColor,
-          width: 2,
+    return GestureDetector(
+      onTap: () => _showBottomSheet(context),
+      child: Container(
+        margin: EdgeInsets.symmetric(
+          vertical: height * 0.02,
+          horizontal: width * 0.02,
         ),
-      ),
-      child: Column(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: CachedNetworkImage(
-              imageUrl: widget.news.urlToImage ?? "",
-              progressIndicatorBuilder: (context, url, downloadProgress) =>
-                  Center(
-                      child: CircularProgressIndicator(
-                value: downloadProgress.progress,
-                color: AppColors.greyColor,
-              )),
-              errorWidget: (context, url, error) => Icon(
-                Icons.error,
-                size: 40,
-                color: AppColors.redColor,
-              ),
-            ),
+        padding: EdgeInsets.symmetric(
+          vertical: height * 0.01,
+          horizontal: width * 0.02,
+        ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Theme.of(context).indicatorColor,
+            width: 2,
           ),
-          SizedBox(
-            height: height * 0.02,
-          ),
-          Text(
-            widget.news.title ?? "",
-            style: Theme.of(context).textTheme.headlineLarge,
-          ),
-          SizedBox(
-            height: height * 0.02,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  "By: ${widget.news.author ?? ""}",
-                  style: AppStyles.grey12Medium,
+        ),
+        child: Column(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: CachedNetworkImage(
+                imageUrl: widget.news.urlToImage ?? "",
+                progressIndicatorBuilder: (context, url, downloadProgress) =>
+                    Center(
+                        child: CircularProgressIndicator(
+                  value: downloadProgress.progress,
+                  color: AppColors.greyColor,
+                )),
+                errorWidget: (context, url, error) => Icon(
+                  Icons.error,
+                  size: 40,
+                  color: AppColors.redColor,
                 ),
               ),
-              Text(
-                formatTimeDifference(publishedDate),
-                style: AppStyles.grey12Medium,
-              ),
-            ],
-          ),
-        ],
+            ),
+            SizedBox(
+              height: height * 0.02,
+            ),
+            Text(
+              widget.news.title ?? "",
+              style: Theme.of(context).textTheme.headlineLarge,
+            ),
+            SizedBox(
+              height: height * 0.02,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    "By: ${widget.news.author ?? ""}",
+                    style: AppStyles.grey12Medium,
+                  ),
+                ),
+                Text(
+                  formatTimeDifference(publishedDate),
+                  style: AppStyles.grey12Medium,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 }
+
+
+

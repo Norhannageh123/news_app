@@ -20,7 +20,7 @@ class _CategoryFragmentState extends State<CategoryFragment> {
     List<CategoryModel> categoryList = [];
     var themeProvider = Provider.of<AppThemeProvider>(context);
     var isDarkTheme=Theme.of(context).brightness==Brightness.dark;
-    categoryList = CategoryModel.getCategoriesList(context);
+    categoryList = CategoryModel.getCategoriesList(context,themeProvider.isDark());
 
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
@@ -63,10 +63,7 @@ class _CategoryFragmentState extends State<CategoryFragment> {
                            ClipRRect(
                                   borderRadius: BorderRadius.circular(16),
                                   child: Image.asset(
-                                    Theme.of(context).brightness==Brightness.dark?
-                                     categoryList[index].imageDarkPath
-                                    :categoryList[index].imageLightPath,
-                                   
+                                     categoryList[index].imagePath,
                                     fit: BoxFit.cover,
                                   ),
                                 ),

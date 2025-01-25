@@ -4,10 +4,9 @@ import 'package:news_app/utls/app_images.dart';
 class CategoryModel {
   String id;
   String title;
-  String imageLightPath;
-  String imageDarkPath;
+  String imagePath;
   CategoryModel(
-      {required this.id, required this.title, required this.imageLightPath,required this.imageDarkPath});
+      {required this.id, required this.title, required this.imagePath});
   /*
   business entertainment
   general health
@@ -15,46 +14,43 @@ class CategoryModel {
   technology
   */
   static List<CategoryModel> getCategoriesList(
-      BuildContext context) {
+      BuildContext context,isDark) {
     return [
       CategoryModel(
           id: 'entertainment',
           title: 'Entertainment',
-          imageLightPath: AppImages.entrainmentLight,
-          imageDarkPath : AppImages.entrainmentDark
+          imagePath: isDark?AppImages.entrainmentLight:AppImages.entrainmentDark,
           ),
       CategoryModel(
         id: 'business',
         title: 'Business',
-        imageLightPath: AppImages.businessLight,
-        imageDarkPath : AppImages.businessDark,
+         imagePath: isDark?AppImages.businessLight:AppImages.businessDark,
       ),
       CategoryModel(
         id: 'general',
         title: 'General',
-        imageLightPath: AppImages.generalLight,
-        imageDarkPath : AppImages.generalDark,
+         imagePath: isDark?AppImages.generalLight:AppImages.generalDark,
       ),
       CategoryModel(
           id: 'health',
           title: 'Health',
-          imageLightPath: AppImages.healthLight,
-          imageDarkPath : AppImages.healthDarj),
+          imagePath: isDark?AppImages.healthLight:AppImages.healthDarj,
+         ),
       CategoryModel(
           id: 'science',
           title: 'Science',
-          imageLightPath: AppImages.scienceLight,
-          imageDarkPath: AppImages.scienceDark),
+           imagePath: isDark?AppImages.scienceLight:AppImages.scienceDark,
+         ),
       CategoryModel(
           id: 'technology',
           title: 'Technology',
-          imageLightPath: AppImages.technologyLight,
-          imageDarkPath : AppImages.technologyDark),
+           imagePath: isDark?AppImages.technologyLight:AppImages.technologyDark,
+         ),
       CategoryModel(
           id: 'sports',
           title: 'Sports',
-          imageLightPath: AppImages.sportsLight,
-          imageDarkPath : AppImages.sportsDark),
+           imagePath: isDark?AppImages.sportsLight:AppImages.sportsDark,
+          ),
     ];
   }
 }

@@ -18,10 +18,10 @@ class _TabBarCategoryState extends State<TabBarCategory> {
 
   @override
   Widget build(BuildContext context) {
-    // التحقق من وجود عناصر في القائمة
+  
     if (widget.sourceList.isEmpty) {
       return Center(
-        child: Text('No sources available'), // رسالة إذا كانت القائمة فارغة
+        child: Text('No sources available'), 
       );
     }
 
