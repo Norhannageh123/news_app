@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:news_app/Models/category_model.dart';
+import 'package:news_app/Models/sourseResponce.dart';
 import 'package:news_app/Ui/home/Catergory%20Details/categor_fragment.dart';
 import 'package:news_app/Ui/home/Catergory%20Details/category_details.dart';
 import 'package:news_app/Ui/home/Drawer/home_drawer.dart';
+import 'package:news_app/Ui/home/news/search_bar.dart';
 import 'package:news_app/provider/languageProvider.dart';
 import 'package:news_app/utls/app_colors.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -16,6 +18,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  int selectedIndex = 0;
+
+  List<Source> sourceList = [];
   @override
   Widget build(BuildContext context) {
     final languageProvider = Provider.of<LanguageProvider>(context);  
@@ -24,8 +29,12 @@ class _HomePageState extends State<HomePage> {
        appBar: AppBar(
          title: Text(
           selectedCategory==null ?
-          AppLocalizations.of(context)!.home: selectedCategory!.title??"",
+          AppLocalizations.of(context)!.home: selectedCategory!.title,
          style:Theme.of(context).textTheme.labelLarge),
+          actions: [
+          SearchBarr(sourceList: sourceList, sourceNumber: selectedIndex,),
+        ],
+
        ),
        drawer: Drawer(
         backgroundColor: AppColors.blackColor,
