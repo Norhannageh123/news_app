@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:news_app/Ui/home/Catergory%20Details/cubit/bloc_observer.dart';
 import 'package:news_app/provider/languageProvider.dart';
 import 'package:news_app/provider/themeProvider.dart';
 import 'package:news_app/utls/app_theme.dart';
@@ -9,6 +11,7 @@ import 'package:provider/provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+   Bloc.observer = MyBlocObserver();
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (context) => LanguageProvider()),
     ChangeNotifierProvider(create: (context) => AppThemeProvider()),

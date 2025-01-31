@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:news_app/ApI/api_manager.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_app/Models/category_model.dart';
-import 'package:news_app/Models/sourseResponce.dart';
+import 'package:news_app/Ui/home/Catergory%20Details/cubit/sourceState.dart';
+import 'package:news_app/Ui/home/Catergory%20Details/cubit/sourceViewModl.dart';
 import 'package:news_app/Ui/home/Catergory%20Details/tabBarWidget.dart';
 import 'package:news_app/provider/languageProvider.dart';
 import 'package:news_app/utls/app_colors.dart';
@@ -19,9 +20,8 @@ class CategoryDetails extends StatefulWidget {
 }
 
 class _CategoryDetailsState extends State<CategoryDetails> {
-  late Future<SourseResponce?> futureSources = Future.value(null);
-
   late String currentLanguage;
+  late SourceViewModel viewModel;
 
   @override
   void initState() {
@@ -31,132 +31,89 @@ class _CategoryDetailsState extends State<CategoryDetails> {
       final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
       currentLanguage = languageProvider.appLanguage;
 
-      setState(() {
-        futureSources = ApiManager.getSources(widget.category?.id ?? "", currentLanguage);
-      });
+      viewModel.getSources(widget.category?.id ?? "", currentLanguage);
     });
+
+    viewModel = SourceViewModel();
   }
 
   @override
   Widget build(BuildContext context) {
     final languageProvider = Provider.of<LanguageProvider>(context);
     currentLanguage = languageProvider.appLanguage;
+
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
     var theme = Theme.of(context);
     var isDarkTheme = theme.brightness == Brightness.dark;
     final appLocalizations = AppLocalizations.of(context);
 
-    return Container(
-      color: theme.scaffoldBackgroundColor,
-      child: FutureBuilder<SourseResponce?>(
-        future: futureSources,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: CircularProgressIndicator(
-                color: isDarkTheme ? AppColors.whiteColor : AppColors.greyColor,
-              ),
-            );
-          } else if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.error_outline_outlined,
-                      color: AppColors.redColor,
-                      size: 40,
-                    ),
-                    SizedBox(width: width * 0.03),
-                    Text(
-                      appLocalizations!.something_went_wrong,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    Image.asset(
-                      AppImages.error,
-                      height: height * 0.3,
-                      width: width * 0.2,
-                    ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.redColor,
-                        padding: EdgeInsets.symmetric(
-                            horizontal: width * 0.02, vertical: height * 0.02),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        elevation: 5,
+    return BlocProvider(
+      create: (_) => viewModel,
+      child: Container(
+        color: theme.scaffoldBackgroundColor,
+        child: BlocBuilder<SourceViewModel, SourceState>(
+          builder: (context, state) {
+            if (state is SourceLoadingState) {
+              return Center(
+                child: CircularProgressIndicator(
+                  color: isDarkTheme ? AppColors.whiteColor : AppColors.greyColor,
+                ),
+              );
+            } else if (state is SourceErrorState) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline_outlined,
+                        color: AppColors.redColor,
+                        size: 40,
                       ),
-                      onPressed: () {
-                        setState(() {
-                          futureSources = ApiManager.getSources(widget.category?.id ?? "", currentLanguage);
-                        });
-                      },
-                      child: Text(
-                        appLocalizations.try_again,
+                      SizedBox(width: width * 0.03),
+                      Text(
+                        state.errorMessage ?? appLocalizations!.something_went_wrong,
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-
-          if (snapshot.hasData && snapshot.data!.status != "ok") {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.error_outline_outlined,
-                      color: AppColors.redColor,
-                      size: 40,
-                    ),
-                    SizedBox(width: width * 0.03),
-                    Text(
-                      snapshot.data!.message ?? appLocalizations!.something_went_wrong,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    Image.asset(
-                      AppImages.error,
-                      height: height * 0.3,
-                      width: width * 0.2,
-                    ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.redColor,
-                        padding: EdgeInsets.symmetric(
-                            horizontal: width * 0.02, vertical: height * 0.02),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
+                      Image.asset(
+                        AppImages.error,
+                        height: height * 0.3,
+                        width: width * 0.2,
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.redColor,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: width * 0.02, vertical: height * 0.02),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          elevation: 5,
                         ),
-                        elevation: 5,
+                        onPressed: () {
+                          viewModel.getSources(widget.category?.id ?? "", currentLanguage);
+                        },
+                        child: Text(
+                          appLocalizations!.try_again,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
                       ),
-                      onPressed: () {
-                        setState(() {
-                          futureSources = ApiManager.getSources(widget.category?.id ?? "", currentLanguage);
-                        });
-                      },
-                      child: Text(
-                        appLocalizations!.try_again,
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          }
-
-          var sourceList = snapshot.data!.sources ?? [];
-          return TabBarCategory(sourceList: sourceList);
-        },
+              );
+            } else if (state is SourceSuccessState) {
+              var sourceList = state.sourceList;
+              return TabBarCategory(sourceList: sourceList!);
+            } else {
+              return Center(
+                child: Text(appLocalizations!.something_went_wrong),
+              );
+            }
+          },
+        ),
       ),
     );
   }

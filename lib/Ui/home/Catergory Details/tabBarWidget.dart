@@ -50,7 +50,7 @@ class _TabBarCategoryState extends State<TabBarCategory> {
         Expanded(
           child: widget.sourceList.isNotEmpty
               ? NewsWidget(source: widget.sourceList[selectedIndex])
-              : Center(child: CircularProgressIndicator()),
+              :const  Center(child: CircularProgressIndicator()),
         ),
       ],
     );

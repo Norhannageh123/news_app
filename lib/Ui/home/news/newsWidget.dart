@@ -1,32 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:news_app/ApI/api_manager.dart';
-import 'package:news_app/Models/sourseResponce.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:news_app/Ui/home/news/Cubit/news_view_model.dart';
 import 'package:news_app/Ui/home/news/news_item.dart';
 import 'package:news_app/provider/languageProvider.dart';
 import 'package:news_app/utls/app_colors.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:news_app/Ui/home/news/Cubit/newsState.dart';
+import 'package:news_app/Models/sourseResponce.dart';
 
 class NewsWidget extends StatefulWidget {
-  NewsWidget({super.key, required this.source});
+  const NewsWidget({super.key, required this.source});
   final Source source;
 
   @override
   State<NewsWidget> createState() => _NewsWidgetState();
 }
+
 class _NewsWidgetState extends State<NewsWidget> {
-  List<dynamic> articles = []; 
-  int currentPage = 1;
-  bool isLoading = false;
-  bool hasMore = true;
   late ScrollController _scrollController;
+  late NewsViewModel _newsViewModel;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(_scrollListener);
-    _updateNews(); 
+    _newsViewModel = NewsViewModel();
+    _loadNews();
   }
 
   @override
@@ -34,10 +35,10 @@ class _NewsWidgetState extends State<NewsWidget> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.source.id != widget.source.id) {
       setState(() {
-        articles.clear();
-        currentPage = 1;
-        hasMore = true;
-        _updateNews();
+        _newsViewModel.newsList.clear();
+        _newsViewModel.currentPage = 1;
+        _newsViewModel.hasMore = true;
+        _loadNews();
       });
     }
   }
@@ -49,45 +50,18 @@ class _NewsWidgetState extends State<NewsWidget> {
   }
 
   void _scrollListener() {
-    if (_scrollController.position.pixels ==
-            _scrollController.position.maxScrollExtent &&
-        !isLoading &&
-        hasMore) {
-      _updateNews();
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent * 0.9 &&
+        _newsViewModel.hasMore) {
+      _loadNews();
     }
   }
 
-  void _updateNews() async {
-    if (isLoading || !hasMore) return;
-
-    setState(() {
-      isLoading = true;
-    });
-
-    final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
+  void _loadNews() {
+    final languageProvider =
+        Provider.of<LanguageProvider>(context, listen: false);
     String currentLanguage = languageProvider.appLanguage;
-
-    try {
-      var response = await ApiManager.getNewsbysourceId(
-        widget.source.id!,
-        currentLanguage,
-        currentPage,
-      );
-
-      if (response != null && response.articles != null) {
-        setState(() {
-          articles.addAll(response.articles!); 
-          currentPage++;
-          hasMore = response.articles!.isNotEmpty; 
-        });
-      }
-    } catch (e) {
-      print("Error: $e");
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
+    _newsViewModel.getNews(widget.source.id!, currentLanguage, _newsViewModel.currentPage);
   }
 
   @override
@@ -96,36 +70,51 @@ class _NewsWidgetState extends State<NewsWidget> {
     final isDarkTheme = theme.brightness == Brightness.dark;
     final appLocalizations = AppLocalizations.of(context);
 
-    return Container(
-      color: theme.scaffoldBackgroundColor,
-      child: articles.isEmpty && isLoading
-          ? Center(
+    return BlocProvider.value(
+      value: _newsViewModel,
+      child: BlocBuilder<NewsViewModel, NewsState>(
+        builder: (context, state) {
+          if (state is NewsLoadingState && _newsViewModel.newsList.isEmpty) {
+            return Center(
               child: CircularProgressIndicator(
                 color: isDarkTheme ? AppColors.whiteColor : AppColors.greyColor,
               ),
-            )
-          : ListView.builder(
-              controller: _scrollController,
-              itemCount: articles.length + 1, 
-              itemBuilder: (context, index) {
-                if (index < articles.length) {
-                  return NewsItem(news: articles[index]); 
-                } else {
-                  return hasMore
-                      ? Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: CircularProgressIndicator(
-                              color: isDarkTheme
-                                  ? AppColors.whiteColor
-                                  : AppColors.greyColor,
+            );
+          } else if (state is NewsErrorState) {
+            return Center(
+              child: Text(state.errorMessage!),
+            );
+          } else if (state is NewsSuccessState || _newsViewModel.newsList.isNotEmpty) {
+            return Container(
+              color: theme.scaffoldBackgroundColor,
+              child: ListView.builder(
+                controller: _scrollController,
+                itemCount: _newsViewModel.newsList.length + 1,
+                itemBuilder: (context, index) {
+                  if (index < _newsViewModel.newsList.length) {
+                    return NewsItem(news: _newsViewModel.newsList[index]);
+                  } else {
+                    return _newsViewModel.hasMore
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: CircularProgressIndicator(
+                                color: isDarkTheme
+                                    ? AppColors.whiteColor
+                                    : AppColors.greyColor,
+                              ),
                             ),
-                          ),
-                        )
-                      : SizedBox.shrink();
-                }
-              },
-            ),
+                          )
+                        : const SizedBox.shrink();
+                  }
+                },
+              ),
+            );
+          } else {
+            return const SizedBox.shrink();
+          }
+        },
+      ),
     );
   }
 }
