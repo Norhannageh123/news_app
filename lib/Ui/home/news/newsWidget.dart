@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_app/Ui/home/news/Cubit/news_view_model.dart';
 import 'package:news_app/Ui/home/news/news_item.dart';
+import 'package:news_app/di/di.dart';
 import 'package:news_app/provider/languageProvider.dart';
 import 'package:news_app/utls/app_colors.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -26,7 +27,7 @@ class _NewsWidgetState extends State<NewsWidget> {
     super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(_scrollListener);
-    _newsViewModel = NewsViewModel();
+    _newsViewModel = NewsViewModel(newsRepositoryContract: injectRepositoryNewsResponse());
     _loadNews();
   }
 

@@ -4,6 +4,9 @@ import 'package:news_app/Models/NewsResponse.dart';
 import 'package:news_app/Models/sourseResponce.dart';
 import 'package:news_app/provider/languageProvider.dart';
 import 'package:news_app/provider/themeProvider.dart';
+import 'package:news_app/repository/news/repository/news_repository_contract.dart';
+import 'package:news_app/repository/news/repository/news_repository_impl.dart';
+import 'package:news_app/repository/news/data_sources/remote_news_repository_impl.dart';
 import 'package:news_app/utls/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'news_item.dart';
@@ -24,6 +27,7 @@ class SearchBarr extends StatefulWidget {
 
 class _SearchBarrState extends State<SearchBarr> {
   SearchController searchControllerr = SearchController();
+  late NewsRepositoryContract newsRepositoryContract;
 
   @override
   void initState() {
@@ -31,6 +35,11 @@ class _SearchBarrState extends State<SearchBarr> {
     searchControllerr.addListener(() {
       setState(() {});
     });
+
+    // تهيئة newsRepositoryContract
+    newsRepositoryContract = NewsRepositoryImpl(
+      remoteNewsRepository: RemoteNewsRepositoryImpl(apiManager: ApiManager()),
+    );
   }
 
   @override
@@ -81,7 +90,7 @@ class _SearchBarrState extends State<SearchBarr> {
             height: 15,
           ),
           FutureBuilder<NewsResponse?>(
-            future: ApiManager.getNewsbysourceId(
+            future: newsRepositoryContract.getNewsbysourceId(
               widget.sourceList[widget.sourceNumber].id!,
               languageProvider.appLanguage,
               1,

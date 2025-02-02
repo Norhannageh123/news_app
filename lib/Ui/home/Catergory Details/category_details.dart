@@ -4,6 +4,7 @@ import 'package:news_app/Models/category_model.dart';
 import 'package:news_app/Ui/home/Catergory%20Details/cubit/sourceState.dart';
 import 'package:news_app/Ui/home/Catergory%20Details/cubit/sourceViewModl.dart';
 import 'package:news_app/Ui/home/Catergory%20Details/tabBarWidget.dart';
+import 'package:news_app/di/di.dart';
 import 'package:news_app/provider/languageProvider.dart';
 import 'package:news_app/utls/app_colors.dart';
 import 'package:news_app/utls/app_images.dart';
@@ -34,7 +35,7 @@ class _CategoryDetailsState extends State<CategoryDetails> {
       viewModel.getSources(widget.category?.id ?? "", currentLanguage);
     });
 
-    viewModel = SourceViewModel();
+    viewModel = SourceViewModel(sourceRepository: injectRepositorySourceResponse());
   }
 
   @override

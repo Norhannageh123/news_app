@@ -1,10 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:news_app/ApI/api_manager.dart';
 import 'package:news_app/Ui/home/news/Cubit/newsState.dart';
+import 'package:news_app/repository/news/repository/news_repository_contract.dart';
 
 class NewsViewModel extends Cubit<NewsState> {
-  NewsViewModel() : super(NewsLoadingState()); 
-
+ late NewsRepositoryContract newsRepositoryContract;
+  NewsViewModel({required this.newsRepositoryContract}) : super(NewsLoadingState());
   List<dynamic> newsList = []; 
   int currentPage = 1;
   bool hasMore = true; 
@@ -17,7 +17,7 @@ class NewsViewModel extends Cubit<NewsState> {
         emit(NewsLoadingState());
       }
 
-      var response = await ApiManager.getNewsbysourceId(sourceId, currentLanguage, page);
+      var response = await newsRepositoryContract.getNewsbysourceId(sourceId, currentLanguage, page);
 
       if (response?.status == "error") {
         emit(NewsErrorState(errorMessage: response!.message!));
