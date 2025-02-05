@@ -6,8 +6,8 @@ class RemoteNewsRepositoryImpl implements RemoteNewsRepository{
   ApiManager apiManager;
   RemoteNewsRepositoryImpl({required this.apiManager});
   @override
-  Future<NewsResponse?> getNewsbysourceId(sourceId, currentLanguage, page)async {
-    var response= await apiManager.getNewsbysourceId(sourceId, currentLanguage, page);
+  Future<NewsResponse?> getNewsBySourceId(sourceId, currentLanguage, page)async {
+    var response= await apiManager.getNewsBySourceId(sourceId, currentLanguage, page);
     return response;
   }
 

@@ -1,12 +1,16 @@
-class SourseResponce {
-  SourseResponce({
+import 'package:hive/hive.dart';
+part 'sourseResponce.g.dart';
+
+@HiveType(typeId: 0)
+class SourceResponse extends HiveObject{
+  SourceResponse({
     this.status,
     this.sources,
     this.code,
     this.message,
   });
 
-  SourseResponce.fromJson(dynamic json) {
+  SourceResponse.fromJson(dynamic json) {
     status = json['status'];
     code= json['code'];
     message=json['message'];
@@ -17,9 +21,13 @@ class SourseResponce {
       });
     }
   }
+  @HiveField(0)
   String? status;
+  @HiveField(1)
   List<Source>? sources;
+  @HiveField(2)
   String? code;
+  @HiveField(3)
   String? message;
 
   Map<String, dynamic> toJson() {
@@ -39,8 +47,8 @@ class SourseResponce {
 /// category : "general"
 /// language : "en"
 /// country : "us"
-
-class Source {
+@HiveType(typeId: 1)
+class Source  extends HiveObject{
   Source({
     this.id,
     this.name,
@@ -60,12 +68,19 @@ class Source {
     language = json['language'];
     country = json['country'];
   }
+  @HiveField(0)
   String? id;
+  @HiveField(1)
   String? name;
+  @HiveField(2)
   String? description;
+  @HiveField(3)
   String? url;
+  @HiveField(4)
   String? category;
+  @HiveField(5)
   String? language;
+  @HiveField(6)
   String? country;
 
   Map<String, dynamic> toJson() {

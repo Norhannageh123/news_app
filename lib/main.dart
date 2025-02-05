@@ -1,17 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive/hive.dart';
+import 'package:news_app/Models/sourseResponce.dart';
 import 'package:news_app/Ui/home/Catergory%20Details/cubit/bloc_observer.dart';
+import 'package:news_app/di/di_inject.dart';
 import 'package:news_app/provider/languageProvider.dart';
 import 'package:news_app/provider/themeProvider.dart';
 import 'package:news_app/utls/app_theme.dart';
 import 'package:news_app/Ui/home/home.dart';
 import 'package:news_app/utls/app_routes.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async{
   WidgetsFlutterBinding.ensureInitialized();
    Bloc.observer = MyBlocObserver();
+   var directory=await getApplicationCacheDirectory();
+   Hive.init(directory.path);
+   Hive.registerAdapter(SourceResponseAdapter());
+   Hive.registerAdapter(SourceAdapter());
+   configureDependencies();
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (context) => LanguageProvider()),
     ChangeNotifierProvider(create: (context) => AppThemeProvider()),

@@ -17,7 +17,7 @@ class NewsViewModel extends Cubit<NewsState> {
         emit(NewsLoadingState());
       }
 
-      var response = await newsRepositoryContract.getNewsbysourceId(sourceId, currentLanguage, page);
+      var response = await newsRepositoryContract.getNewsBySourceId(sourceId, currentLanguage, page);
 
       if (response?.status == "error") {
         emit(NewsErrorState(errorMessage: response!.message!));

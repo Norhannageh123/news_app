@@ -4,6 +4,7 @@ import 'package:news_app/Models/NewsResponse.dart';
 import 'package:news_app/Models/sourseResponce.dart';
 import 'package:news_app/provider/languageProvider.dart';
 import 'package:news_app/provider/themeProvider.dart';
+import 'package:news_app/repository/news/data_sources/offline_news_data_source_imol.dart';
 import 'package:news_app/repository/news/repository/news_repository_contract.dart';
 import 'package:news_app/repository/news/repository/news_repository_impl.dart';
 import 'package:news_app/repository/news/data_sources/remote_news_repository_impl.dart';
@@ -38,7 +39,8 @@ class _SearchBarrState extends State<SearchBarr> {
 
     // تهيئة newsRepositoryContract
     newsRepositoryContract = NewsRepositoryImpl(
-      remoteNewsRepository: RemoteNewsRepositoryImpl(apiManager: ApiManager()),
+      remoteNewsRepository: RemoteNewsRepositoryImpl(apiManager: ApiManager.getInstance()),
+      offlineNewsDataSource:  OfflineNewsDataSourceImpl(),
     );
   }
 
@@ -90,7 +92,7 @@ class _SearchBarrState extends State<SearchBarr> {
             height: 15,
           ),
           FutureBuilder<NewsResponse?>(
-            future: newsRepositoryContract.getNewsbysourceId(
+            future: newsRepositoryContract.getNewsBySourceId(
               widget.sourceList[widget.sourceNumber].id!,
               languageProvider.appLanguage,
               1,

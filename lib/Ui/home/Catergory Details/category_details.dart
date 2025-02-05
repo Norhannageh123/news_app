@@ -35,7 +35,8 @@ class _CategoryDetailsState extends State<CategoryDetails> {
       viewModel.getSources(widget.category?.id ?? "", currentLanguage);
     });
 
-    viewModel = SourceViewModel(sourceRepository: injectRepositorySourceResponse());
+      viewModel = SourceViewModel(sourceRepository: injectRepositorySourceResponse());
+   // SourceViewModel viewModel= getIt<SourceViewModel>();
   }
 
   @override
